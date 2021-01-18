@@ -16,6 +16,7 @@ import org.infinispan.configuration.global.GlobalConfigurationBuilder;
 import org.infinispan.manager.DefaultCacheManager;
 import org.infinispan.manager.EmbeddedCacheManager;
 import org.infinispan.persistence.jdbc.configuration.JdbcStringBasedStoreConfigurationBuilder;
+import org.infinispan.persistence.sifs.configuration.SoftIndexFileStoreConfigurationBuilder;
 import org.infinispan.transaction.LockingMode;
 import org.infinispan.transaction.TransactionMode;
 import org.infinispan.transaction.lookup.GenericTransactionManagerLookup;
@@ -37,6 +38,7 @@ public class InfinispanService {
   boolean indexingCacheConfigActive = false;
   boolean persistenceCacheConfigActive = false;
   boolean filePersistenceCacheConfigActive = false;
+  boolean softIndexPersistenceCacheConfigActive = false;
   boolean simpleTransactionCacheConfigActive = false;
   boolean transactionCacheConfigActive = false;
   boolean batchingCacheConfigActive = false;
@@ -149,6 +151,30 @@ public class InfinispanService {
                 .enabled(true);
     }
 
+    if(softIndexPersistenceCacheConfigActive) {
+      configBuilder
+          .clustering().hash().numSegments(8)
+          .persistence()
+            .passivation(false)
+            .addStore(SoftIndexFileStoreConfigurationBuilder.class)
+              .indexLocation("caches")
+                .indexSegments(3)
+              .dataLocation("caches")
+              .preload(false)
+              .shared(false)
+              .fetchPersistentState(true)
+              .ignoreModifications(false)
+              .purgeOnStartup(false)
+              .segmented(true) // setting to false is somehow not working
+
+    //          .addProperty("hash.numSegments", "8") // somehow not working
+              .async()
+    //              .disable();
+                .enabled(true)
+              .modificationQueueSize(1025)
+              .threadPoolSize(5);
+    }
+
     if(simpleTransactionCacheConfigActive) {
       configBuilder
           .transaction()
@@ -250,6 +276,10 @@ public class InfinispanService {
 
   public void setFilePersistenceCacheConfigActive(boolean filePersistenceCacheConfigActive) {
     this.filePersistenceCacheConfigActive = filePersistenceCacheConfigActive;
+  }
+
+  public void setSoftIndexPersistenceCacheConfigActive(boolean softIndexPersistenceCacheConfigActive) {
+    this.softIndexPersistenceCacheConfigActive = softIndexPersistenceCacheConfigActive;
   }
 
   public void setSimpleTransactionCacheConfigActive(boolean simpleTransactionCacheConfigActive) {

@@ -14,6 +14,7 @@ public class InfinispanServiceFactory {
   public boolean indexingCacheConfigActive = false;
   public boolean persistenceCacheConfigActive = false;
   public boolean filePersistenceCacheConfigActive = false;
+  public boolean softIndexPersistenceCacheConfigActive = false;
   public boolean simpleTransactionCacheConfigActive = false;
   public boolean transactionCacheConfigActive = false;
   public boolean batchingCacheConfigActive = false;
@@ -38,6 +39,7 @@ public class InfinispanServiceFactory {
     infinispanService.setIndexingCacheConfigActive(indexingCacheConfigActive);
     infinispanService.setPersistenceCacheConfigActive(persistenceCacheConfigActive);
     infinispanService.setFilePersistenceCacheConfigActive(filePersistenceCacheConfigActive);
+    infinispanService.setSoftIndexPersistenceCacheConfigActive(softIndexPersistenceCacheConfigActive);
     infinispanService.setSimpleTransactionCacheConfigActive(simpleTransactionCacheConfigActive);
     infinispanService.setTransactionCacheConfigActive(transactionCacheConfigActive);
     infinispanService.setBatchingCacheConfigActive(batchingCacheConfigActive);

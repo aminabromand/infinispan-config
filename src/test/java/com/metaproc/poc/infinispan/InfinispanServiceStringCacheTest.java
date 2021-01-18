@@ -3,6 +3,7 @@ package com.metaproc.poc.infinispan;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Map.Entry;
 import javax.transaction.HeuristicMixedException;
 import javax.transaction.HeuristicRollbackException;
 import javax.transaction.NotSupportedException;
@@ -25,7 +26,7 @@ public class InfinispanServiceStringCacheTest {
 
   @After
   public void removeTempFiles() throws IOException {
-    FileUtils.deleteDirectory(new File(Paths.get(System.getProperty("user.dir"), "target", "nodes").toString()));
+//    FileUtils.deleteDirectory(new File(Paths.get(System.getProperty("user.dir"), "target", "nodes").toString()));
   }
 
   @Test
@@ -722,5 +723,45 @@ public class InfinispanServiceStringCacheTest {
     cache.remove("id3");
     cache.put("id3", "removed and added value3");
     cache.endBatch(true);
+  }
+
+  @Test
+  public void testSifs() throws InterruptedException, IOException {
+
+    infinispanServiceFactory.transportConfigActive = true;
+    infinispanServiceFactory.serializationConfigActive = true;
+    infinispanServiceFactory.globalStateConfigActive = true;
+
+    infinispanServiceFactory.clusteringCacheConfigActive = true;
+    infinispanServiceFactory.indexingCacheConfigActive = false;
+    infinispanServiceFactory.persistenceCacheConfigActive = false;
+    infinispanServiceFactory.filePersistenceCacheConfigActive = false;
+    infinispanServiceFactory.softIndexPersistenceCacheConfigActive = true;
+    infinispanServiceFactory.simpleTransactionCacheConfigActive = false;
+    infinispanServiceFactory.transactionCacheConfigActive = true;
+    infinispanServiceFactory.batchingCacheConfigActive = false;
+    infinispanServiceFactory.isolationCacheConfigActive = false;
+
+
+    InfinispanService infinispanService = infinispanServiceFactory.build(1);
+
+    Cache<String, String> stringCache = infinispanService.getStringCache();
+
+    for(Entry<String, String> entry : stringCache.entrySet()) {
+      System.out.println("key: " + entry.getKey() + ", value: " + entry.getValue());
+    }
+
+    System.out.println("#######: cache size" + stringCache.size());
+    stringCache.put("key", "value");
+    System.out.println(stringCache.get("key"));
+    System.out.println("#######: cache size" + stringCache.size());
+
+    for(Entry<String, String> entry : stringCache.entrySet()) {
+      System.out.println("key: " + entry.getKey() + ", value: " + entry.getValue());
+    }
+
+    infinispanService.deactivate();
+
+    Thread.sleep(3000);
   }
 }
